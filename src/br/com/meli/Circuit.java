@@ -14,7 +14,13 @@ public class Circuit {
         this.regularPrice = regularPrice;
         this.raceCategory = raceCategory;
         this.circuitLength = circuitLength;
+    }
 
+    public int getPrice(boolean isCompetitorUnderage) {
+        if (isCompetitorUnderage && isUnderageAllowed){
+            return underAgePrice;
+        }
+        return regularPrice;
     }
 
     public String getDescription() {

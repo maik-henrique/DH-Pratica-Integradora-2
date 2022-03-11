@@ -25,25 +25,28 @@ public class JungleRace implements AutoCloseable {
     }
 
     public void subscribe(final Competitor competitor) {
-        boolean isValidOption = false;
+        Circuit selectedCircuit = getUserSelectedCircuit(competitor);
+        int price = selectedCircuit.getPrice(competitor.isUnderAge());
+
+        competitor.setTaxaInscricao(price);
+        competitor.setId(this.lastSubscribedId);
+        competitor.setRaceTypes(selectedCircuit.getRaceTypes());
+        this.competitorsMap.put(competitor.getId(), competitor);
+        this.lastSubscribedId++;
+
+        System.out.println("Inscrição feita com sucesso!");
+        System.out.printf("Número de inscrição: %d - Taxa de inscrição: %d\n", competitor.getId(), selectedCircuit.getRegularPrice());
+
+    }
+
+    private Circuit getUserSelectedCircuit(Competitor competitor) {
         Circuit selectedCircuit;
+        boolean isValidOption = false;
 
         do {
             System.out.println("Opções de circuitos disponíveis:");
 
-            this.availableCircuits.entrySet().stream().forEach(circuitItem -> {
-                Circuit circuit = circuitItem.getValue();
-                int circuitId = circuitItem.getKey();
-
-                System.out.printf("Circuito: %s - Taxa: %d - ID: %d - Comprimento: %d km - Descrição: %s",
-                        circuit.getRaceTypes().label, circuit.getRegularPrice(), circuitId, circuit.getCircuitLength(),
-                        circuit.getDescription());
-
-                if (circuit.isUnderageAllowed()) {
-                    System.out.printf(" - Preço para menores: %d", circuit.getUnderAgePrice());
-                }
-                System.out.println();
-            });
+            printAvailableCircuits();
 
             System.out.println("Digite o circuito desejado:");
             int selectedOption = scanner.nextInt();
@@ -55,7 +58,7 @@ public class JungleRace implements AutoCloseable {
                 continue;
             }
 
-            if (!selectedCircuit.isUnderageAllowed() && competitor.getIdade() < 18) {
+            if (!selectedCircuit.isUnderageAllowed() && competitor.isUnderAge()) {
                 System.out.println("Circuito não permitido para menores de idade, escolha outro");
                 continue;
             }
@@ -64,16 +67,23 @@ public class JungleRace implements AutoCloseable {
 
         } while (!isValidOption);
 
-        int price = competitor.getIdade() < 18 && selectedCircuit.isUnderageAllowed() ? selectedCircuit.getUnderAgePrice() : selectedCircuit.getRegularPrice();
-        competitor.setTaxaInscricao(price);
-        competitor.setId(this.lastSubscribedId);
-        competitor.setRaceTypes(selectedCircuit.getRaceTypes());
-        this.competitorsMap.put(competitor.getId(), competitor);
-        this.lastSubscribedId++;
+        return selectedCircuit;
+    }
 
-        System.out.println("Inscrição feita com sucesso!");
-        System.out.printf("Número de inscrição: %d - Taxa de inscrição: %d\n", competitor.getId(), selectedCircuit.getRegularPrice());
+    private void printAvailableCircuits() {
+        this.availableCircuits.entrySet().forEach(circuitItem -> {
+            Circuit circuit = circuitItem.getValue();
+            int circuitId = circuitItem.getKey();
 
+            System.out.printf("Circuito: %s - Taxa: %d - ID: %d - Comprimento: %d km - Descrição: %s",
+                    circuit.getRaceTypes().label, circuit.getRegularPrice(), circuitId, circuit.getCircuitLength(),
+                    circuit.getDescription());
+
+            if (circuit.isUnderageAllowed()) {
+                System.out.printf(" - Preço para menores: %d", circuit.getUnderAgePrice());
+            }
+            System.out.println();
+        });
     }
 
     public void printCompetitorsByCategory() {

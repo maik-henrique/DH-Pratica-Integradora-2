@@ -24,6 +24,10 @@ public class Competitor {
         this.rg = rg;
     }
 
+    public boolean isUnderAge() {
+        return idade < 18;
+    }
+
     public String getNome() {
         return nome;
     }
@@ -78,7 +82,7 @@ public class Competitor {
 
     @Override
     public String toString() {
-        return "br.com.meli.Competitor{" +
+        return "{" +
                 "nome='" + nome + '\'' +
                 ", raceCategory=" + raceCategory.label +
                 '}';
